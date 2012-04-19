@@ -7,7 +7,6 @@ require 'awesome_print'
 class ChatServer
   def initialize (port)
     @connections = {}
-    @key = ""
     @server = TCPServer.new("", port)
     puts "Chat Server started on port" << port.to_s
   end
@@ -22,12 +21,11 @@ class ChatServer
           puts("cmd: #{cmd}")
           puts("data: #{data}")
 
-          @key = key || @key
           case cmd
           when 'reg'
-            @connections[@key] = sock
+            @connections[key] = sock
           when 'send'
-            broadcast("#{@key}:#{data}")
+            broadcast(key, "#{key}:#{data}")
           when 'quit'
           when 'system'
           end
@@ -38,10 +36,10 @@ class ChatServer
     end
   end
 
-  def broadcast(msg)
+  def broadcast(key, msg)
     puts "= Broadcasting ="
-    @connections.each do |key, sock|
-      sock.puts(msg)
+    @connections.each do |id, sock|
+      sock.puts(msg) unless key == id 
     end
   end
 end
