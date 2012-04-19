@@ -1,4 +1,4 @@
-#!/home/desk001/.rvm/rubies/ruby-1.9.3-p0/bin/ruby
+#!/usr/bin/ruby
 
 require 'socket'
 require 'awesome_print'
@@ -34,42 +34,5 @@ loop do
     end
   end
 end
-
-=begin
-sock = TCPSocket.open('127.0.0.1', 4980)
-key = OPTS[:u]
-begin
-  received_msg = sock.read_nonblock(1024)
-  puts received_msg
-rescue SystemCallError
-end
-
-loop do
-  sent_message = STDIN.gets
-  break if sent_message == 'quit'
-
-  sock.puts("#{key}:#{sent_message}")
-  sock.flush
-
-  response = sock.readpartial(1024)
-  puts(response)
-end
-=end
-  
-=begin
-while true
-  while line = sock.gets
-#  puts sock.recv(100)
-#  puts sock.gets
-    puts line
-    if line == "EOF\n" then
-      break
-    end
-  end
-  msg = gets
-  sock.write("#{key}:#{msg}")
-end
-sock.close
-=end
 
 client.close

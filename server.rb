@@ -1,5 +1,7 @@
+#!/usr/bin/ruby
+
 require 'socket'
-require 'ap'
+require 'awesome_print'
 
 class ChatServer
   def initialize (port)
