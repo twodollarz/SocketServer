@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 
+require 'rubygems'
 require 'socket'
 require 'awesome_print'
 require 'optparse'
