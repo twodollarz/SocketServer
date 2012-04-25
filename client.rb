@@ -30,8 +30,8 @@ loop do
       client.flush
     when TCPSocket
       received_msg = client.read_nonblock(1024)
-      puts "= Received ="
-      puts received_msg
+      #puts "= Received ="
+      #puts received_msg
     end
   end
 end

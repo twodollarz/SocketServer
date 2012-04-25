@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+# encoding: utf-8 -*-
+
 require 'rubygems'
 require 'socket'
 require 'awesome_print'
@@ -17,14 +19,20 @@ class ChatServer
         while sock.gets
           puts("= Accept =")
           (key, cmd, data) = $_.split(":")
+          
           puts("key: #{key}")
           puts("cmd: #{cmd}")
           puts("data: #{data}")
+          data.chomp!
+          unpackdata = data.unpack("n*").inspect
+          puts("unpack data: #{unpackdata}")
 
           case cmd
           when 'reg'
-            @connections[key] = sock
+            @connections[data] = sock
           when 'send'
+            broadcast(key, "#{key}:#{data}")
+          when 'sendimg'
             broadcast(key, "#{key}:#{data}")
           when 'quit'
           when 'system'
@@ -39,8 +47,12 @@ class ChatServer
   def broadcast(key, msg)
     puts "= Broadcasting ="
     @connections.each do |id, sock|
-      sock.puts(msg) unless key == id 
+      unless key == id then
+        puts "* Broadcasting #{id}"
+        sock.puts("#{msg}\n")
+      end
     end
+    puts "= Broadcasting Done ="
   end
 end
 
