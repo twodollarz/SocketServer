@@ -47,7 +47,8 @@ class ChatServer
     @connections.each do |id, sock|
       unless key == id then
         puts "* Broadcasting #{id}"
-        sock.puts("#{msg}\n")
+        #sock.puts("#{msg}\n")
+        sock.puts("#{msg}")
       end
     end
     puts "= Broadcasting Done ="
