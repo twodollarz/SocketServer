@@ -31,6 +31,7 @@ class ChatServer
           when 'send'
             broadcast(key, "#{key}:#{data}")
           when 'sendimg'
+            save_image(key, data)
             broadcast(key, "#{key}:#{data}")
           when 'quit'
           when 'system'
@@ -47,12 +48,24 @@ class ChatServer
     @connections.each do |id, sock|
       unless key == id then
         puts "* Broadcasting #{id}"
-        #sock.puts("#{msg}\n")
         sock.puts("#{msg}")
+        #sock.puts("#{msg}\n")
+        #msg.chomp!
+        #sock.write("#{msg}")
+        #sock.send("#{msg}")
+        #sock.flush
       end
     end
     puts "= Broadcasting Done ="
   end
+
+  def save_image(key, data)
+    fw = open("test_copy.png", "w")
+    data.chomp!
+    fw.write(data)
+    fw.close
+  end
+
 end
 
 chat_server = ChatServer.new( 4980 ).run()
