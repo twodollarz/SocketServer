@@ -18,9 +18,11 @@ class ChatServer
         while sock.gets
           puts("= Accept =")
           (key, cmd, data) = $_.split(":")
+          enc = data.unpack("n*").inspect
           puts("key: #{key}")
           puts("cmd: #{cmd}")
           puts("data: #{data}")
+          puts("encode: #{enc}")
 
           @key = key || @key
           case cmd
