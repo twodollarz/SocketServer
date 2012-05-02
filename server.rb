@@ -5,6 +5,7 @@
 require 'rubygems'
 require 'socket'
 require 'awesome_print'
+require 'base64'
 
 class ChatServer
   def initialize (port)
@@ -16,7 +17,9 @@ class ChatServer
   def run
     loop do
       Thread.start(@server.accept) do |sock|
-        while sock.gets
+       #save_image("append", sock.read_nonblock(1024))
+       #save_image("whole", data)
+       while sock.gets
           puts("= Accept =")
           (key, cmd, data) = $_.split(":")
           puts("key: #{key}")
@@ -48,9 +51,9 @@ class ChatServer
     @connections.each do |id, sock|
       unless key == id then
         puts "* Broadcasting #{id}"
+        msg.chomp!
         sock.puts("#{msg}")
         #sock.puts("#{msg}\n")
-        #msg.chomp!
         #sock.write("#{msg}")
         #sock.send("#{msg}")
         #sock.flush
@@ -60,9 +63,12 @@ class ChatServer
   end
 
   def save_image(key, data)
-    fw = open("test_copy.png", "w")
-    data.chomp!
-    fw.write(data)
+    puts "save_image"
+    #fw = open("#{key}_copy.png", "a+b")
+    time = Time.now.strftime("%Y%m%d%H%M%S")
+    fw = open("tmp/#{key}_#{time}.png", "w+b")
+    #data.chomp!
+    fw.write(Base64.decode64(data))
     fw.close
   end
 
