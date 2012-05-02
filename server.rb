@@ -31,11 +31,12 @@ class ChatServer
           case cmd
           when 'reg'
             @connections[data] = sock
+            send_back(key, "#{key}:#{cmd}:#{data}")
           when 'send'
-            broadcast(key, "#{key}:#{data}")
+            broadcast(key, "#{key}:#{cmd}:#{data}")
           when 'sendimg'
             save_image(key, data)
-            broadcast(key, "#{key}:#{data}")
+            broadcast(key, "#{key}:#{cmd}:#{data}")
           when 'quit'
           when 'system'
           end
@@ -53,13 +54,21 @@ class ChatServer
         puts "* Broadcasting #{id}"
         msg.chomp!
         sock.puts("#{msg}")
-        #sock.puts("#{msg}\n")
-        #sock.write("#{msg}")
-        #sock.send("#{msg}")
-        #sock.flush
       end
     end
     puts "= Broadcasting Done ="
+  end
+
+  def send_back(key, msg)
+    puts "= Send Back ="
+    @connections.each do |id, sock|
+      if key == id then
+        puts "* Send back to #{id}"
+        msg.chomp!
+        sock.puts("#{msg}")
+      end
+    end
+    puts "= Send Back Done ="
   end
 
   def save_image(key, data)
