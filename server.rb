@@ -10,34 +10,45 @@ require 'base64'
 class ChatServer
   def initialize (port)
     @connections = {}
+    @sequence = 0
+    @thread = nil
     @server = TCPServer.new("", port)
     puts "Chat Server started on port" << port.to_s
   end
 
   def run
     loop do
-      Thread.start(@server.accept) do |sock|
-       #save_image("append", sock.read_nonblock(1024))
-       #save_image("whole", data)
+      @thread = Thread.start(@server.accept) do |sock|
        while sock.gets
           puts("= Accept =")
-          (key, cmd, data) = $_.split(":")
+          (key, cmd, obj1, obj2) = $_.split(":")
           puts("key: #{key}")
           puts("cmd: #{cmd}")
-          puts("data: #{data}")
-          data.chomp!
-          unpackdata = data.unpack("n*").inspect
-          puts("unpack data: #{unpackdata}")
+          puts("obj1: #{obj1}")
+          puts("obj2: #{obj2}")
+          obj2.chomp!
+          
           case cmd
+          # first access ( udid:reg:profiles[]=> udid:reg:profiles[]:true:uid )
           when 'reg'
+            udid = key
+            nickname = obj1
             @connections[data] = sock
             send_back(key, "#{key}:#{cmd}:#{data}")
+          # app launch ( uid:conn => uid:conn:true:messages[] )
+          when 'conn'
+          # sendmsg ( uid:sendmsg:o-uid:message => uid:sendmsg:o-uid:message:true ) 
           when 'send'
             broadcast(key, "#{key}:#{cmd}:#{data}")
+          # sendimage ( uid:sendimg:o-uid:BASE64(imagebin) => uid:sendimg:o-uid:BASE64(imagebin):true ) 
           when 'sendimg'
             save_image(key, data)
             broadcast(key, "#{key}:#{cmd}:#{data}")
+          # disconn ( uid:disconn => uid:disconn:true )
           when 'quit'
+          # apply ( uid:apply:o-uid => uid:apply:o-uid:true )
+          when 'pipe'
+          # approve( uid:approve:o-uid => uid:approve:o-uid:true )
           when 'system'
           end
           puts "= Connections ="
@@ -45,6 +56,11 @@ class ChatServer
         end
       end
     end
+  end
+
+  def generate_uid
+    @sequence += 1
+    return @sequence
   end
 
   def broadcast(key, msg)
@@ -83,5 +99,5 @@ class ChatServer
 
 end
 
-chat_server = ChatServer.new( 4980 ).run()
+#chat_server = ChatServer.new( 4980 ).run()
 
