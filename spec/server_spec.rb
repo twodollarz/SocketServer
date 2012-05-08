@@ -1,4 +1,5 @@
-require './server'
+require 'spec_helper'
+require 'server'
 
 describe ChatServer do
   before do

@@ -2,10 +2,13 @@
 
 # encoding: utf-8 -*-
 
+$:.unshift File.expand_path(File.join(File.dirname(__FILE__), ".", "model"))
+
 require 'rubygems'
 require 'socket'
 require 'awesome_print'
 require 'base64'
+require 'user'
 
 class ChatServer
   def initialize (port)
@@ -13,37 +16,38 @@ class ChatServer
     @sequence = 0
     @thread = nil
     @server = TCPServer.new("", port)
+    @user = Pipe::Model::User.new
     puts "Chat Server started on port" << port.to_s
   end
 
   def run
     loop do
       @thread = Thread.start(@server.accept) do |sock|
-       while sock.gets
+        while sock.gets
           puts("= Accept =")
-          (key, cmd, obj1, obj2) = $_.split(":")
-          puts("key: #{key}")
+          $_.chomp!
+          (timestamp, id, cmd, obj1, obj2) = $_.split(":")
+          puts("timestamp: #{timestamp}")
+          puts("id: #{id}")
           puts("cmd: #{cmd}")
           puts("obj1: #{obj1}")
           puts("obj2: #{obj2}")
-          obj2.chomp!
-          
+
           case cmd
           # first access ( udid:reg:profiles[]=> udid:reg:profiles[]:true:uid )
           when 'reg'
-            udid = key
-            nickname = obj1
+            udid = id
             @connections[data] = sock
-            send_back(key, "#{key}:#{cmd}:#{data}")
+            send_back(id, "#{id}:#{cmd}:#{data}")
           # app launch ( uid:conn => uid:conn:true:messages[] )
           when 'conn'
           # sendmsg ( uid:sendmsg:o-uid:message => uid:sendmsg:o-uid:message:true ) 
           when 'send'
-            broadcast(key, "#{key}:#{cmd}:#{data}")
+            broadcast(id, "#{id}:#{cmd}:#{data}")
           # sendimage ( uid:sendimg:o-uid:BASE64(imagebin) => uid:sendimg:o-uid:BASE64(imagebin):true ) 
           when 'sendimg'
-            save_image(key, data)
-            broadcast(key, "#{key}:#{cmd}:#{data}")
+            save_image(id, data)
+            broadcast(id, "#{id}:#{cmd}:#{data}")
           # disconn ( uid:disconn => uid:disconn:true )
           when 'quit'
           # apply ( uid:apply:o-uid => uid:apply:o-uid:true )
