@@ -5,25 +5,23 @@ require 'user'
 
 describe Pipes::Model::User do
   before(:all) do
-    @user_dbh= Pipes::Model::User.new()
-    @user = @user_dbh.create( {:udid => '0000-0000-0000-0000'} ) 
+    @user_dbh = Pipes::Model::User.new()
+    @user = @user_dbh.create( {:uid => 'f-kid', :udid => '0000-0000-0000-0000'} ) 
   end
 
   context 'When create' do
     subject { @user }
     describe 'New user' do
       it { should_not be_nil }
-      it 'uuid should be created' do
-        subject[:uuid].should_not be_nil
-      end
-      it 'udid should be same as input' do
-        subject[:udid].should == '0000-0000-0000-0000'
+      it 'should be created' do
+        found_user = @user_dbh.find(@user[:uid])
+        found_user.should_not be_nil
+        found_user[:udid].should == '0000-0000-0000-0000'
       end
     end
-    describe 'Duplicated user' do
-      it 'should not be created' do
-        lambda { @user_dbh.create({:udid => '0000-0000-0000-0000'}) }.should raise_error(Pipes::Model::User::DuplicatedUserError)
-      end
+    it 'Duplicated user should not be created' do
+      lambda { @user_dbh.create({:uid => 'twodollarz', :udid => '0000-0000-0000-0000'}) }.should raise_error(Pipes::Model::User::DuplicatedUserError)
+      lambda { @user_dbh.create({:uid => 'f-kid', :udid => '1111-1111-1111-1111'}) }.should raise_error(Pipes::Model::User::DuplicatedUserError)
     end
   end
 
@@ -31,13 +29,13 @@ describe Pipes::Model::User do
     subject { @user }
     context 'With existing user' do
        it 'should be found' do
-         found_user = @user_dbh.find(@user[:uuid])
+         found_user = @user_dbh.find(@user[:uid])
          found_user[:udid].should == @user[:udid]
        end
     end
     context 'With non-existing user' do
        it 'should not be found' do
-         lambda { @user_dbh.find('non-existing-uuid') }.should raise_error(Pipes::Model::User::UserNotFoundError)
+         lambda { @user_dbh.find('non-existing-uid') }.should raise_error(Pipes::Model::User::UserNotFoundError)
        end
     end
   end
@@ -45,38 +43,30 @@ describe Pipes::Model::User do
   context 'When set profile' do
     subject { @user }
     it 'Tel should be chaned' do
-      @user_dbh.set( @user[:uuid], { key: 'tel', value: '090-0000-0000' })
-      found_user = @user_dbh.find(@user[:uuid])
+      @user_dbh.set( @user[:uid], { key: 'tel', value: '090-0000-0000' })
+      found_user = @user_dbh.find(@user[:uid])
       found_user[:tel].should == '090-0000-0000' 
     end
     it 'Nickname(muli-byte character) should be chaned' do
-      @user_dbh.set( @user[:uuid], { key: 'nickname', value: 'akira' })
-      found_user = @user_dbh.find(@user[:uuid])
+      @user_dbh.set( @user[:uid], { key: 'nickname', value: 'akira' })
+      found_user = @user_dbh.find(@user[:uid])
       found_user[:nickname].should == 'akira' 
     end
     it 'Nickname(single-byte character should be chaned' do
-      @user_dbh.set( @user[:uuid], { key: 'nickname', value: 'あきら' })
-      found_user = @user_dbh.find(@user[:uuid])
+      @user_dbh.set( @user[:uid], { key: 'nickname', value: 'あきら' })
+      found_user = @user_dbh.find(@user[:uid])
       found_user[:nickname].should == 'あきら' 
     end
-    it 'Duplicated userid should not be chaned' do
-  
-      lambda { @user_dbh.set( @user[:uuid], { key: 'userid', value: @user[:uuid] }) }.should raise_error(Pipes::Model::User::DuplicatedUserError)
+    it 'Non-existing user should raise error' do
+      lambda { @user_dbh.set( 'non-existing-uid', { key: 'userid', value: 'f-kid' }) }.should raise_error(Pipes::Model::User::UserNotFoundError)
     end
-    it 'Userid should be chaned' do
-      @user_dbh.set( @user[:uuid], { key: 'userid', value: 'f-kid' })
-      found_user = @user_dbh.find(@user[:uuid])
-      found_user[:userid].should == 'f-kid' 
+    it 'Invalid column should not be changed' do
+      lambda { @user_dbh.set( @user[:uid], { key: 'invalidcolumn', value: 'foobarbaz' }) }.should raise_error(Pipes::Model::User::UnknownColumnError)
     end
-=begin
-    describe 'Faceimage(base64 encoded string) should be decoded and changed' do
-      @user_dbh.set( @user[:uuid], { key: 'faceimage', value: '' })
-      found_user = @user_dbh.find(@user[:uuid])
-      found_user[:userid].should == 'f-kid' 
-    end
-=end
-    describe 'Invalid column' do
-       
+    it 'Faceimage(base64 encoded string) should be changed' do
+      @user_dbh.set( @user[:uid], { key: 'faceimage_path', value: '/data/faceimage.jpg'})
+      found_user = @user_dbh.find(@user[:uid])
+      found_user[:faceimage_path].should == '/data/faceimage.jpg' 
     end
   end
 end
