@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!usr/bin/ruby
 
 # encoding: utf-8 -*-
 
@@ -16,7 +16,7 @@ class ChatServer
     @sequence = 0
     @thread = nil
     @server = TCPServer.new("", port)
-    @user = Pipe::Model::User.new
+    @user = Pipes::Model::User.new
     puts "Chat Server started on port" << port.to_s
   end
 
