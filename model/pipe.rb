@@ -29,7 +29,7 @@ module Pipes
         from, to, uids = escape_uids(args[:obj], args[:subj])
 
         found_pipe = find_with_uids(uids)
-        result = @conn.query("UPDATE pipe set status = 1 WHERE pipeid = '#{found_pipe[:pipeid]}}'")
+        result = @conn.query("UPDATE pipe set status = 1 WHERE pipe_id = '#{found_pipe[:pipe_id]}}'")
         return result 
       end
       
@@ -38,7 +38,7 @@ module Pipes
         from, to, uids = escape_uids(args[:subj], args[:obj])
 
         found_pipe = find_with_uids(uids)
-        result = @conn.query("UPDATE pipe set status = 2 WHERE pipeid = '#{found_pipe[:pipeid]}}'")
+        result = @conn.query("UPDATE pipe set status = 2 WHERE pipe_id = '#{found_pipe[:pipe_id]}}'")
         return result 
       end
 
