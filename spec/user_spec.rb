@@ -20,8 +20,8 @@ describe Pipes::Model::User do
       end
     end
     it 'Duplicated user should not be created' do
-      lambda { @user_dbh.create({:uid => 'twodollarz', :udid => '0000-0000-0000-0000'}) }.should raise_error(Pipes::Model::User::DuplicatedUserError)
-      lambda { @user_dbh.create({:uid => 'f-kid', :udid => '1111-1111-1111-1111'}) }.should raise_error(Pipes::Model::User::DuplicatedUserError)
+      expect { @user_dbh.create({:uid => 'twodollarz', :udid => '0000-0000-0000-0000'}) }.to raise_error(Pipes::Model::User::DuplicatedUserError)
+      expect { @user_dbh.create({:uid => 'f-kid', :udid => '1111-1111-1111-1111'}) }.to raise_error(Pipes::Model::User::DuplicatedUserError)
     end
   end
 
@@ -35,7 +35,7 @@ describe Pipes::Model::User do
     end
     context 'With non-existing user' do
        it 'should not be found' do
-         lambda { @user_dbh.find('non-existing-uid') }.should raise_error(Pipes::Model::User::UserNotFoundError)
+         expect { @user_dbh.find('non-existing-uid') }.to raise_error(Pipes::Model::User::UserNotFoundError)
        end
     end
   end
@@ -58,10 +58,10 @@ describe Pipes::Model::User do
       found_user[:nickname].should == 'あきら' 
     end
     it 'Non-existing user should raise error' do
-      lambda { @user_dbh.set( 'non-existing-uid', { key: 'userid', value: 'f-kid' }) }.should raise_error(Pipes::Model::User::UserNotFoundError)
+      expect { @user_dbh.set( 'non-existing-uid', { key: 'userid', value: 'f-kid' }) }.to raise_error(Pipes::Model::User::UserNotFoundError)
     end
     it 'Invalid column should not be changed' do
-      lambda { @user_dbh.set( @user[:uid], { key: 'invalidcolumn', value: 'foobarbaz' }) }.should raise_error(Pipes::Model::User::UnknownColumnError)
+      expect { @user_dbh.set( @user[:uid], { key: 'invalidcolumn', value: 'foobarbaz' }) }.to raise_error(Pipes::Model::User::UnknownColumnError)
     end
     it 'Faceimage(base64 encoded string) should be changed' do
       @user_dbh.set( @user[:uid], { key: 'faceimage_path', value: '/data/faceimage.jpg'})
