@@ -45,7 +45,7 @@ module Pipes
       def validate_uids (subj, obj)
         raise InvalidUserError if subj == obj || subj.blank? || obj.blank?
         user = @conn.query("SELECT * FROM user WHERE uid IN ('#{subj}', '#{obj}')")
-        raise UserNotFoundError if user.count == 0
+        raise UserNotFoundError if user.count != 2
       end
 
       def escape_uids(from, to) 
@@ -65,7 +65,7 @@ module Pipes
         elsif results_to.count > 0
           return results_to.first
         else
-          raise PipeNotFound 
+          raise PipeNotFoundError
         end
       end
 
@@ -75,7 +75,7 @@ module Pipes
         if results.count  > 0
           return results.first
         else
-          raise PipeNotFound 
+          raise PipeNotFoundError 
         end
       end
 

@@ -32,9 +32,14 @@ describe Pipes::Model::Pipe do
         expect { @pipe_dbh.create({:subj => 'helium', :obj => ''}) }.to raise_error(Pipes::Model::Pipe::InvalidUserError)
       end 
     end
-    context "With a non-existing uid" do
+    context "With a non-existing from_uid" do
       it "Pipe should not be created" do
-        expect { @pipe_dbh.create({:subj => 'goto', :obj => 'hell'}) }.to raise_error(Pipes::Model::Pipe::UserNotFoundError)
+        expect { @pipe_dbh.create({:subj => 'goto', :obj => 'helium'}) }.to raise_error(Pipes::Model::Pipe::UserNotFoundError)
+      end 
+    end
+    context "With a non-existing to_uid" do
+      it "Pipe should not be created" do
+        expect { @pipe_dbh.create({:subj => 'helium', :obj => 'hell'}) }.to raise_error(Pipes::Model::Pipe::UserNotFoundError)
       end 
     end
   end
@@ -67,9 +72,14 @@ describe Pipes::Model::Pipe do
         expect { @pipe_dbh.approve({:subj => 'helium', :obj => ''}) }.to raise_error(Pipes::Model::Pipe::InvalidUserError)
       end 
     end
-    context "With a non-existing uid" do
+    context "With a non-existing from_uid" do
       it "Pipe should not be approved" do
-        expect { @pipe_dbh.approve({:subj => 'goto', :obj => 'hell'}) }.to raise_error(Pipes::Model::Pipe::UserNotFoundError)
+        expect { @pipe_dbh.approve({:subj => 'goto', :obj => 'helium'}) }.to raise_error(Pipes::Model::Pipe::UserNotFoundError)
+      end 
+    end
+    context "With a non-existing to_uid" do
+      it "Pipe should not be approved" do
+        expect { @pipe_dbh.approve({:subj => 'helium', :obj => 'hell'}) }.to raise_error(Pipes::Model::Pipe::UserNotFoundError)
       end 
     end
   end
@@ -110,9 +120,14 @@ describe Pipes::Model::Pipe do
         expect { @pipe_dbh.break({:subj => 'helium', :obj => ''}) }.to raise_error(Pipes::Model::Pipe::InvalidUserError)
       end 
     end
-    context "With a non-existing uid" do
+    context "With a non-existing from_uid" do
       it "Pipe should not be breaked" do
-        expect { @pipe_dbh.break({:subj => 'goto', :obj => 'hell'}) }.to raise_error(Pipes::Model::Pipe::UserNotFoundError)
+        expect { @pipe_dbh.break({:subj => 'goto', :obj => 'helium'}) }.to raise_error(Pipes::Model::Pipe::UserNotFoundError)
+      end 
+    end
+    context "With a non-existing to_uid" do
+      it "Pipe should not be breaked" do
+        expect { @pipe_dbh.break({:subj => 'helium', :obj => 'hell'}) }.to raise_error(Pipes::Model::Pipe::UserNotFoundError)
       end 
     end
   end
@@ -129,6 +144,36 @@ describe Pipes::Model::Pipe do
         @uids = @pipe_dbh.concat_uid('natrium', 'helium')
       end
       it { @uids.should == 'heliumnatrium' } 
+    end 
+  end
+
+  describe "#find_with_uid" do
+    context "With valid params" do
+      before do
+        @found_pipe = @pipe_dbh.find_with_uid('lithium')
+      end
+      subject { @found_pipe }
+      it { should_not be_nil } 
+    end 
+    context "With invalid params" do
+      it 'Shoud be raise error' do
+        expect { @pipe_dbh.find_with_uid('foo') }.to raise_error(Pipes::Model::Pipe::PipeNotFoundError)
+      end
+    end 
+  end
+  
+  describe "#find_with_uids" do
+    context "With valid params" do
+      before do
+        @found_pipe = @pipe_dbh.find_with_uids(@pipe_dbh.concat_uid('lithium','neon'))
+      end
+      subject { @found_pipe }
+      it { should_not be_nil } 
+    end 
+    context "With invalid params" do
+      it 'Shoud be raise error' do
+        expect { @pipe_dbh.find_with_uids('foobar') }.to raise_error(Pipes::Model::Pipe::PipeNotFoundError)
+      end
     end 
   end
 end
