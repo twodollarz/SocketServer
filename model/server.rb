@@ -50,7 +50,7 @@ class ChatServer
     begin 
       user_dbh = Pipes::Model::User.new
       user_dbh.create({:uid => uid, :udid => udid})
-      send_toward(uid, "#{timestamp}:#{uid}:reg:sucess")
+      send_toward(uid, "#{timestamp}:#{uid}:reg:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:reg:error:#{$!}")
     end
@@ -62,7 +62,7 @@ class ChatServer
     begin 
       user_dbh = Pipes::Model::User.new
       user_dbh.set(uid, {:key => obj1, :value => obj2})
-      send_toward(uid, "#{timestamp}:#{uid}:set:sucess")
+      send_toward(uid, "#{timestamp}:#{uid}:set:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:set:error:#{$!}")
     end
@@ -74,7 +74,7 @@ class ChatServer
       pipe_dbh = Pipes::Model::Pipe.new
       pipe_dbh.create({:subj => uid, :obj => obj1})
       send_toward(obj1, "#{timestamp}:#{uid}:apply")
-      send_toward(uid, "#{timestamp}:#{uid}:apply:sucess")
+      send_toward(uid, "#{timestamp}:#{uid}:apply:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:apply:error:#{$!}")
     end
@@ -86,7 +86,7 @@ class ChatServer
       pipe_dbh = Pipes::Model::Pipe.new
       pipe_dbh.approve({:subj => uid, :obj => obj1})
       send_toward(obj1, "#{timestamp}:#{uid}:approve")
-      send_toward(uid, "#{timestamp}:#{uid}:approve:sucess")
+      send_toward(uid, "#{timestamp}:#{uid}:approve:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:approve:error:#{$!}")
     end
@@ -98,7 +98,7 @@ class ChatServer
       pipe_dbh = Pipes::Model::Pipe.new
       pipe_dbh.break({:subj => uid, :obj => obj1})
       send_toward(obj1, "#{timestamp}:#{uid}:break")
-      send_toward(uid, "#{timestamp}:#{uid}:break:sucess")
+      send_toward(uid, "#{timestamp}:#{uid}:break:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:break:error:#{$!}")
     end
@@ -110,7 +110,7 @@ class ChatServer
       msg_dbh = Pipes::Model::Message.new
       msg_dbh.send_text({:from_uid => uid, :to_uid => obj1, :timestamp => timestamp, :message => obj2})
       send_toward(obj1, "#{timestamp}:#{uid}:sendtext:#{obj2}")
-      send_toward(uid, "#{timestamp}:#{uid}:sendtext:sucess")
+      send_toward(uid, "#{timestamp}:#{uid}:sendtext:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:sendtext:error:#{$!}")
     end
@@ -123,7 +123,7 @@ class ChatServer
       msg_dbh = Pipes::Model::Message.new
       msg_dbh.send_img({:from_uid => uid, :to_uid => obj1, :timestamp => timestamp, :image_path=> obj2})
       send_toward(obj1, "#{timestamp}:#{uid}:sendimg:#{obj2}")
-      send_toward(uid, "#{timestamp}:#{uid}:sendimg:sucess")
+      send_toward(uid, "#{timestamp}:#{uid}:sendimg:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:sendiimg:error:#{$!}")
     end
@@ -133,7 +133,7 @@ class ChatServer
     uid = id
     add_socket(uid, sock)
     begin 
-      send_toward(uid, "#{timestamp}:#{uid}:online:sucess")
+      send_toward(uid, "#{timestamp}:#{uid}:online:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:online:error:#{$!}")
     end
