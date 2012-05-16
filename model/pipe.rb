@@ -69,6 +69,37 @@ module Pipes
         end
       end
 
+      def find_approved_pipes(uid)
+        uid = @conn.escape(uid)
+        results = @conn.query("SELECT * FROM pipe WHERE (from_uid = '#{uid}' OR to_uid = '#{uid}') AND status = 1")
+        if results.count  > 0
+          return results
+        else
+          raise PipeNotFoundError
+        end
+      end
+
+      def find_applying_pipes(from_uid)
+        from_uid = @conn.escape(from_uid)
+        results = @conn.query("SELECT * FROM pipe WHERE from_uid = '#{from_uid}' AND status = 0")
+        if results.count  > 0
+          return results
+        else
+          raise PipeNotFoundError
+        end
+      end
+
+      def find_applied_pipes(to_uid)
+        to_uid = @conn.escape(to_uid)
+        results= @conn.query("SELECT * FROM pipe WHERE to_uid = '#{to_uid}' AND status = 0")
+        if results.count  > 0
+          return results
+        else
+          raise PipeNotFoundError
+        end
+      end
+
+
       def find_with_uids(uids)
         uids = @conn.escape(uids)
         results = @conn.query("SELECT * FROM pipe WHERE uids = '#{uids}' LIMIT 1")

@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'pipe'
 
 describe Pipes::Model::Pipe do
-  before(:all) do
+  before :all do
     @pipe_dbh = Pipes::Model::Pipe.new()
   end
 
@@ -46,7 +46,7 @@ describe Pipes::Model::Pipe do
   
   describe "#approve" do
     context "With two valid uids" do
-      before do 
+      before :all do 
         @pipe = @pipe_dbh.approve({:subj => 'natrium', :obj => 'helium'})
         uids = @pipe_dbh.concat_uid('natrium', 'helium')
         @found_pipe = @pipe_dbh.find_with_uids(uids)
@@ -86,7 +86,7 @@ describe Pipes::Model::Pipe do
 
   describe "#break" do
     context "With two valid uids (Subject is from_uid)" do
-      before do 
+      before :all do 
         @pipe = @pipe_dbh.break({:subj => 'helium', :obj => 'natrium'})
         uids = @pipe_dbh.concat_uid('helium', 'natrium')
         @found_pipe = @pipe_dbh.find_with_uids(uids)
@@ -96,7 +96,7 @@ describe Pipes::Model::Pipe do
       end 
     end
     context "With two valid uids (Subject is to_uid)" do
-      before do 
+      before :all do 
         @pipe = @pipe_dbh.break({:subj => 'natrium', :obj => 'helium'})
         uids = @pipe_dbh.concat_uid('natrium', 'helium')
         @found_pipe = @pipe_dbh.find_with_uids(uids)
@@ -134,7 +134,7 @@ describe Pipes::Model::Pipe do
 
   describe "#concat_uid" do
     context "With uids in alphabetical order" do
-      before do
+      before :all do
         @uids = @pipe_dbh.concat_uid('helium', 'natrium')
       end
       it { @uids.should == 'heliumnatrium' } 
@@ -149,7 +149,7 @@ describe Pipes::Model::Pipe do
 
   describe "#find_with_uid" do
     context "With valid params" do
-      before do
+      before :all do
         @found_pipe = @pipe_dbh.find_with_uid('lithium')
       end
       subject { @found_pipe }
@@ -161,18 +161,76 @@ describe Pipes::Model::Pipe do
       end
     end 
   end
+
+  describe "#find_approved_pipes" do
+    context "With valid params" do
+      before :all do
+        @found_pipe = @pipe_dbh.find_approved_pipes('lithium')
+      end
+      subject { @found_pipe }
+      it { should_not be_nil } 
+      its(:count) { should eq 1 } 
+    end 
+    context "With valid params" do
+      before :all do
+        @found_pipe = @pipe_dbh.find_approved_pipes('neon')
+      end
+      subject { @found_pipe }
+      it { should_not be_nil } 
+      its(:count) { should eq 1 } 
+    end 
+    context "With invalid params" do
+      it 'Shoud be raise error' do
+        expect { @pipe_dbh.find_approved_pipes('f-kid') }.to raise_error(Pipes::Model::Pipe::PipeNotFoundError)
+      end
+    end 
+  end
   
   describe "#find_with_uids" do
     context "With valid params" do
-      before do
+      before :all do
         @found_pipe = @pipe_dbh.find_with_uids(@pipe_dbh.concat_uid('lithium','neon'))
+      end
+      subject { @found_pipe }
+      it { should_not be_nil } 
+      its([:from_uid]) { should eq 'lithium' } 
+    end 
+    context "With invalid params" do
+      it 'Shoud be raise error' do
+        expect { @pipe_dbh.find_with_uids('foobar') }.to raise_error(Pipes::Model::Pipe::PipeNotFoundError)
+      end
+    end 
+  end
+
+  describe "#find_applying_pipes" do
+    context "With valid params" do
+      before :all do
+        @pipe_dbh.create({:subj => 'natrium', :obj => 'lithium'})
+        @found_pipe = @pipe_dbh.find_applying_pipes('natrium')
+      end
+      subject { @found_pipe }
+      it { should_not be_nil } 
+      its(:count) { should eq 1 } 
+    end 
+    context "With invalid params" do
+      it 'Shoud be raise error' do
+        expect { @pipe_dbh.find_applying_pipes('f-kid') }.to raise_error(Pipes::Model::Pipe::PipeNotFoundError)
+      end
+    end 
+  end
+
+  describe "#find_applied_pipes" do
+    context "With valid params" do
+      before :all do
+        @pipe_dbh.create({:subj => 'neon', :obj => 'helium'})
+        @found_pipe = @pipe_dbh.find_applied_pipes('helium')
       end
       subject { @found_pipe }
       it { should_not be_nil } 
     end 
     context "With invalid params" do
       it 'Shoud be raise error' do
-        expect { @pipe_dbh.find_with_uids('foobar') }.to raise_error(Pipes::Model::Pipe::PipeNotFoundError)
+        expect { @pipe_dbh.find_applied_pipes('f-kid') }.to raise_error(Pipes::Model::Pipe::PipeNotFoundError)
       end
     end 
   end

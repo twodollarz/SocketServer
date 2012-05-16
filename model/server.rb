@@ -139,6 +139,47 @@ class ChatServer
     end
   end
 
+  def couplelist(sock, timestamp, id, obj1, obj2)
+    uid = id
+    begin 
+      pipe_dbh = Pipes::Model::Pipe.new
+      @pipes = pipe_dbh.find_approved_pipes(uid)
+      partners = []
+      @pipes.each do |pipe|
+        theother = (id == pipe[:to_uid]) ? pipe[:from_uid] : pipe[:to_uid]
+        partners.push(theother)
+      end
+      couplelist = partners.join(',')
+      send_toward(uid, "#{timestamp}:#{uid}:couplelist:success:#{couplelist}")
+    rescue
+      send_toward(uid, "#{timestamp}:#{uid}:couplelist:error:#{$!}")
+    end
+  end
+
+  def applylist(sock, timestamp, id, obj1, obj2)
+    uid = id
+    begin 
+      pipe_dbh = Pipes::Model::Pipe.new
+      @pipes = pipe_dbh.find_applying_pipes(uid)
+      applylist = @pipes.map { |pipe| pipe[:to_uid] }.join(',')
+      send_toward(uid, "#{timestamp}:#{uid}:applylist:success:#{applylist}")
+    rescue
+      send_toward(uid, "#{timestamp}:#{uid}:applylist:error:#{$!}")
+    end
+  end
+  def approvelist(sock, timestamp, id, obj1, obj2)
+    uid = id
+    begin 
+      pipe_dbh = Pipes::Model::Pipe.new
+      @pipes = pipe_dbh.find_applied_pipes(uid)
+      approvelist = @pipes.map { |pipe| pipe[:from_uid] }.join(',')
+      send_toward(uid, "#{timestamp}:#{uid}:approvelist:success:#{approvelist}")
+    rescue
+      send_toward(uid, "#{timestamp}:#{uid}:approvelist:error:#{$!}")
+    end
+  end
+
+
   def broadcast(key, msg)
     puts "= Broadcasting ="
     @connections.each do |id, sock|
