@@ -109,7 +109,7 @@ class ChatServer
     begin
       msg_dbh = Pipes::Model::Message.new
       msg_dbh.send_text({:from_uid => uid, :to_uid => obj1, :timestamp => timestamp, :message => obj2})
-      send_toward(obj1, "#{timestamp}:#{uid}:sendtext:#{obj2}")
+      send_toward(obj1, "#{timestamp}:#{uid}:sendtext:#{obj1}:#{obj2}")
       send_toward(uid, "#{timestamp}:#{uid}:sendtext:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:sendtext:error:#{$!}")
@@ -122,7 +122,7 @@ class ChatServer
     begin
       msg_dbh = Pipes::Model::Message.new
       msg_dbh.send_img({:from_uid => uid, :to_uid => obj1, :timestamp => timestamp, :image_path=> obj2})
-      send_toward(obj1, "#{timestamp}:#{uid}:sendimg:#{obj2}")
+      send_toward(obj1, "#{timestamp}:#{uid}:sendimg:#{obj1}:#{obj2}")
       send_toward(uid, "#{timestamp}:#{uid}:sendimg:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:sendiimg:error:#{$!}")
