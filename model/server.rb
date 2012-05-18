@@ -62,9 +62,9 @@ class ChatServer
     begin 
       user_dbh = Pipes::Model::User.new
       user_dbh.set(uid, {:key => obj1, :value => obj2})
-      send_toward(uid, "#{timestamp}:#{uid}:set:success")
+      send_toward(uid, "#{timestamp}:#{uid}:set:#{obj1}:success")
     rescue
-      send_toward(uid, "#{timestamp}:#{uid}:set:error:#{$!}")
+      send_toward(uid, "#{timestamp}:#{uid}:set:#{obj1}:error:#{$!}")
     end
   end
 
