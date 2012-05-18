@@ -56,15 +56,37 @@ class ChatServer
     end
   end
 
-  ## TODO Faceimage: decode base64 string and store as file and update db 
-  def set(sock, timestamp, id, obj1, obj2)
+  def settel(sock, timestamp, id, obj1, obj2)
     uid = id
     begin 
       user_dbh = Pipes::Model::User.new
-      user_dbh.set(uid, {:key => obj1, :value => obj2})
-      send_toward(uid, "#{timestamp}:#{uid}:set:#{obj1}:success")
+      user_dbh.set(uid, {:key => 'tel', :value => obj1})
+      send_toward(uid, "#{timestamp}:#{uid}:settel:success")
     rescue
-      send_toward(uid, "#{timestamp}:#{uid}:set:#{obj1}:error:#{$!}")
+      send_toward(uid, "#{timestamp}:#{uid}:settel:error:#{$!}")
+    end
+  end
+
+  def setnickname(sock, timestamp, id, obj1, obj2)
+    uid = id
+    begin 
+      user_dbh = Pipes::Model::User.new
+      user_dbh.set(uid, {:key => 'nickname', :value => obj1})
+      send_toward(uid, "#{timestamp}:#{uid}:setnickname:success")
+    rescue
+      send_toward(uid, "#{timestamp}:#{uid}:setnickname:error:#{$!}")
+    end
+  end
+
+  ## TODO Faceimage: decode base64 string and store as file and update db 
+  def setfaceimage(sock, timestamp, id, obj1, obj2)
+    uid = id
+    begin 
+      user_dbh = Pipes::Model::User.new
+      user_dbh.set(uid, {:key => 'faceimage_path', :value => obj1})
+      send_toward(uid, "#{timestamp}:#{uid}:setfaceimage:success")
+    rescue
+      send_toward(uid, "#{timestamp}:#{uid}:setfaceimage:error:#{$!}")
     end
   end
 
