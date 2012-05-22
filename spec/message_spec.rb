@@ -131,11 +131,18 @@ describe Pipes::Model::Message do
     end
   end
 
-  describe :offline_log do
+  describe :get_log do
     context 'With valid params' do
+      context 'When include one message log' do
+        before do
+          @found_logs = @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000011'})
+        end
+        subject { @found_logs }
+        it { should_not be nil}
+      end
       context 'When from_timestamp(last online time) is same' do
         before do
-          @found_logs = @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'})
+          @found_logs = @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'})
         end
         subject { @found_logs }
         it { should be nil }
@@ -144,62 +151,62 @@ describe Pipes::Model::Message do
     context 'With invalid params' do
       context "With same two timestamp" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
+          expect { @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
         end 
       end
       context "With an invalid from_timestamp" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => 'invalidtimestamp', :to_timestamp => '20120101000000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
+          expect { @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => 'invalidtimestamp', :to_timestamp => '20120101000000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
         end 
       end
       context "With an invalid from_timestamp(16 digits)" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '2012010100000000', :to_timestamp => '20120101000000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
+          expect { @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '2012010100000000', :to_timestamp => '20120101000000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
         end 
       end
       context "With an invalid from_timestamp(18 digits)" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '201201010000000000', :to_timestamp => '20120101000000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
+          expect { @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '201201010000000000', :to_timestamp => '20120101000000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
         end 
       end
       context "With an invalid to_timestamp" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => 'invalidtimestamp'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
+          expect { @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => 'invalidtimestamp'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
         end 
       end
       context "With an invalid to_timestamp(16 digits)" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '2012010100000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
+          expect { @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '2012010100000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
         end 
       end
       context "With an invalid to_timestamp(18 digits)" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '201201010000000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
+          expect { @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '201201010000000000'}) }.to raise_error(Pipes::Model::Message::InvalidTimestampError)
         end 
       end
       context "With same two uids" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => 'lithium', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'}) }.to raise_error(Pipes::Model::Message::InvalidUserError)
+          expect { @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'lithium', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'}) }.to raise_error(Pipes::Model::Message::InvalidUserError)
         end 
       end
       context "With a blank from_uid" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => '', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'}) }.to raise_error(Pipes::Model::Message::InvalidUserError)
+          expect { @spec_obj.get_log({:from_uid => '', :to_uid => 'neon', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'}) }.to raise_error(Pipes::Model::Message::InvalidUserError)
         end 
       end
       context "With a blank to_uid" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => '', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'}) }.to raise_error(Pipes::Model::Message::InvalidUserError)
+          expect { @spec_obj.get_log({:from_uid => 'lithium', :to_uid => '', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'}) }.to raise_error(Pipes::Model::Message::InvalidUserError)
         end 
       end
       context "With a non-existing from_uid" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'goto', :to_uid => 'lithium', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'}) }.to raise_error(Pipes::Model::Message::UserNotFoundError)
+          expect { @spec_obj.get_log({:from_uid => 'goto', :to_uid => 'lithium', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'}) }.to raise_error(Pipes::Model::Message::UserNotFoundError)
         end 
       end
       context "With a non-existing to_uid" do
         it "Message log should not be found" do
-          expect { @spec_obj.offline_log({:from_uid => 'lithium', :to_uid => 'hell', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'}) }.to raise_error(Pipes::Model::Message::UserNotFoundError)
+          expect { @spec_obj.get_log({:from_uid => 'lithium', :to_uid => 'hell', :from_timestamp => '20120101000000000', :to_timestamp => '20120101000000001'}) }.to raise_error(Pipes::Model::Message::UserNotFoundError)
         end 
       end
     end

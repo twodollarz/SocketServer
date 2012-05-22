@@ -41,7 +41,7 @@ module Pipes
         return results
       end
 
-      def offline_log(args)
+      def get_log(args)
         escape_args(args)
         validate_uids(args[:from_uid], args[:to_uid])
         validate_timestamps(args[:from_timestamp], args[:to_timestamp])
@@ -50,7 +50,7 @@ module Pipes
         pipe_id = pipe[:pipe_id]
         results = @conn.query("SELECT * FROM message WHERE pipe_id = '#{pipe_id}' AND timestamp > '#{args[:from_timestamp]}' AND timestamp <= '#{args[:to_timestamp]}'")
 
-        if results.count > 0 
+        if results.count > 0
           return results
         else
           return nil

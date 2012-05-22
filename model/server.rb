@@ -26,11 +26,11 @@ class ChatServer
       @thread = Thread.start(@server.accept) do |sock|
         while sock.gets
           $_.chomp!
-          (timestamp, id, cmd, obj1, obj2) = $_.split(":")
+          (timestamp, id, cmd, obj1, obj2, obj3) = $_.split(":")
           puts ""
           puts "= Accept ="
-          puts ":timestamp => #{timestamp}, :id => #{id}, :cmd => #{cmd}, :obj1 => #{obj1}, :obj2 => #{obj2} "
-          self.send(cmd, sock, timestamp, id, obj1, obj2)
+          puts ":timestamp => #{timestamp}, :id => #{id}, :cmd => #{cmd}, :obj1 => #{obj1}, :obj2 => #{obj2}, :obj3 => #{obj3}"
+          self.send(cmd, sock, timestamp, id, obj1, obj2, obj3)
           puts ""
           puts "= Connections ="
           ap @connections
@@ -43,7 +43,7 @@ class ChatServer
     @connections[key] = sock
   end
 
-  def reg(sock, timestamp, id, obj1, obj2)
+  def reg(sock, timestamp, id, obj1, obj2, obj3)
     uid = obj1
     udid = id
     add_socket(uid, sock)
@@ -56,7 +56,7 @@ class ChatServer
     end
   end
 
-  def settel(sock, timestamp, id, obj1, obj2)
+  def settel(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin 
       user_dbh = Pipes::Model::User.new
@@ -67,7 +67,7 @@ class ChatServer
     end
   end
 
-  def setnickname(sock, timestamp, id, obj1, obj2)
+  def setnickname(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin 
       user_dbh = Pipes::Model::User.new
@@ -79,7 +79,7 @@ class ChatServer
   end
 
   ## TODO Faceimage: decode base64 string and store as file and update db 
-  def setfaceimage(sock, timestamp, id, obj1, obj2)
+  def setfaceimage(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin 
       user_dbh = Pipes::Model::User.new
@@ -90,7 +90,7 @@ class ChatServer
     end
   end
 
-  def apply(sock, timestamp, id, obj1, obj2)
+  def apply(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin
       pipe_dbh = Pipes::Model::Pipe.new
@@ -102,7 +102,7 @@ class ChatServer
     end
   end
 
-  def approve(sock, timestamp, id, obj1, obj2)
+  def approve(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin
       pipe_dbh = Pipes::Model::Pipe.new
@@ -114,7 +114,7 @@ class ChatServer
     end
   end
 
-  def break(sock, timestamp, id, obj1, obj2)
+  def break(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin
       pipe_dbh = Pipes::Model::Pipe.new
@@ -126,7 +126,7 @@ class ChatServer
     end
   end
 
-  def sendtext(sock, timestamp, id, obj1, obj2)
+  def sendtext(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin
       msg_dbh = Pipes::Model::Message.new
@@ -139,7 +139,7 @@ class ChatServer
   end
 
   # TODO save binary
-  def sendimg(sock, timestamp, id, obj1, obj2)
+  def sendimg(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin
       msg_dbh = Pipes::Model::Message.new
@@ -151,7 +151,7 @@ class ChatServer
     end
   end
 
-  def online(sock, timestamp, id, obj1, obj2)
+  def online(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     add_socket(uid, sock)
     begin 
@@ -161,7 +161,7 @@ class ChatServer
     end
   end
 
-  def couplelist(sock, timestamp, id, obj1, obj2)
+  def couplelist(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin 
       pipe_dbh = Pipes::Model::Pipe.new
@@ -178,7 +178,7 @@ class ChatServer
     end
   end
 
-  def applylist(sock, timestamp, id, obj1, obj2)
+  def applylist(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin 
       pipe_dbh = Pipes::Model::Pipe.new
@@ -189,7 +189,7 @@ class ChatServer
       send_toward(uid, "#{timestamp}:#{uid}:applylist:error:#{$!}")
     end
   end
-  def approvelist(sock, timestamp, id, obj1, obj2)
+  def approvelist(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin 
       pipe_dbh = Pipes::Model::Pipe.new
@@ -201,6 +201,18 @@ class ChatServer
     end
   end
 
+  def getlog(sock, timestamp, id, obj1, obj2, obj3)
+    uid = id
+    begin 
+      msg_dbh = Pipes::Model::Message.new
+      logs = msg_dbh.get_log({:from_uid => uid, :to_uid => obj1, :from_timestamp => obj2, :to_timestamp => obj3})
+      require 'json'
+      json_str = JSON.generate(logs)
+      send_toward(uid, "#{timestamp}:#{uid}:getlog:success:valid:#{json_str}")
+    rescue
+      send_toward(uid, "#{timestamp}:#{uid}:getlog:error:#{$!}")
+    end
+  end
 
   def broadcast(key, msg)
     puts "= Broadcasting ="
