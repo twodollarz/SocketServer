@@ -6,14 +6,15 @@ CREATE TABLE IF NOT EXISTS `user` (
   `udid` CHAR(64) NOT NULL,
   `nickname` VARCHAR(255),
   `tel` VARCHAR(255),
+  `device_token` VARCHAR(255),
   `faceimage_path` VARCHAR(255) ,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `i0` (`udid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-INSERT INTO user (uid, udid) values ('helium', '9999-9999-9999-9999');
-INSERT INTO user (uid, udid) values ('natrium', '8888-8888-8888-8888');
-INSERT INTO user (uid, udid) values ('lithium', '7777-7777-7777-7777');
-INSERT INTO user (uid, udid) values ('neon', '6666-6666-6666-6666');
+INSERT INTO user (uid, udid, device_token) values ('helium', '9999-9999-9999-9999', 'e1ecae8c16427802fb3f3d8d20c96995534a8f05b36e71cba296a0f0ff3786de');
+INSERT INTO user (uid, udid, device_token) values ('natrium', '8888-8888-8888-8888', 'e1ecae8c16427802fb3f3d8d20c96995534a8f05b36e71cba296a0f0ff3786de');
+INSERT INTO user (uid, udid, device_token) values ('lithium', '7777-7777-7777-7777', 'e1ecae8c16427802fb3f3d8d20c96995534a8f05b36e71cba296a0f0ff3786de');
+INSERT INTO user (uid, udid, device_token) values ('neon', '6666-6666-6666-6666', 'e1ecae8c16427802fb3f3d8d20c96995534a8f05b36e71cba296a0f0ff3786de');
 CREATE TABLE IF NOT EXISTS `pipe` (
   `pipe_id` INT(11) UNSIGNED AUTO_INCREMENT NOT NULL,
   `from_uid` CHAR(128) NOT NULL,

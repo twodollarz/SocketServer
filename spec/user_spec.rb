@@ -6,7 +6,7 @@ require 'user'
 describe Pipes::Model::User do
   before(:all) do
     @user_dbh = Pipes::Model::User.new()
-    @user = @user_dbh.create( {:uid => 'f-kid', :udid => '0000-0000-0000-0000'} ) 
+    @user = @user_dbh.create( {:uid => 'f-kid', :udid => '0000-0000-0000-0000'} )
   end
 
   context 'When create' do
@@ -45,17 +45,17 @@ describe Pipes::Model::User do
     it 'Tel should be chaned' do
       @user_dbh.set( @user[:uid], { key: 'tel', value: '090-0000-0000' })
       found_user = @user_dbh.find(@user[:uid])
-      found_user[:tel].should == '090-0000-0000' 
+      found_user[:tel].should == '090-0000-0000'
     end
     it 'Nickname(muli-byte character) should be chaned' do
       @user_dbh.set( @user[:uid], { key: 'nickname', value: 'akira' })
       found_user = @user_dbh.find(@user[:uid])
-      found_user[:nickname].should == 'akira' 
+      found_user[:nickname].should == 'akira'
     end
     it 'Nickname(single-byte character should be chaned' do
       @user_dbh.set( @user[:uid], { key: 'nickname', value: 'あきら' })
       found_user = @user_dbh.find(@user[:uid])
-      found_user[:nickname].should == 'あきら' 
+      found_user[:nickname].should == 'あきら'
     end
     it 'Non-existing user should raise error' do
       expect { @user_dbh.set( 'non-existing-uid', { key: 'userid', value: 'f-kid' }) }.to raise_error(Pipes::Model::User::UserNotFoundError)
@@ -66,7 +66,12 @@ describe Pipes::Model::User do
     it 'Faceimage(base64 encoded string) should be changed' do
       @user_dbh.set( @user[:uid], { key: 'faceimage_path', value: '/data/faceimage.jpg'})
       found_user = @user_dbh.find(@user[:uid])
-      found_user[:faceimage_path].should == '/data/faceimage.jpg' 
+      found_user[:faceimage_path].should == '/data/faceimage.jpg'
+    end
+    it 'device token should be changed' do
+      @user_dbh.set( @user[:uid], { key: 'device_token', value: 'f-kid-token'})
+      found_user = @user_dbh.find(@user[:uid])
+      found_user[:device_token].should == 'f-kid-token'
     end
   end
 end

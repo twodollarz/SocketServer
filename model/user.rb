@@ -9,29 +9,29 @@ module Pipes
       class DuplicatedUserError < RuntimeError; end
       class UnknownColumnError < RuntimeError; end
       class UserNotFoundError < RuntimeError; end
-    
+
       def initialize
         Mysql2::Client.default_query_options.merge!(:symbolize_keys => true)
         @conn = Mysql2::Client.new(:database => "pipes", :host => "localhost", :username => "root")
       end
 
       def create(user)
-        raise DuplicatedUserError if exists?({:column => 'uid', :value => user[:uid]}) 
-        raise DuplicatedUserError if exists?({:column => 'udid', :value => user[:udid]}) 
+        raise DuplicatedUserError if exists?({:column => 'uid', :value => user[:uid]})
+        raise DuplicatedUserError if exists?({:column => 'udid', :value => user[:udid]})
         uid = @conn.escape(user[:uid])
         udid = @conn.escape(user[:udid])
         @conn.query("INSERT INTO user (uid, udid) VALUES ('#{uid}', '#{udid}')")
-        return { :uid => user[:uid], :udid => user[:udid] } 
+        return { :uid => user[:uid], :udid => user[:udid] }
       end
 
       def set( uid, args )
         key = @conn.escape(args[:key])
         value = @conn.escape(args[:value])
         raise UserNotFoundError unless exists?({:column => 'uid', :value => uid})
-        if %w(nickname tel faceimage_path).include?(key)
+        if %w(nickname tel faceimage_path device_token).include?(key)
           @conn.query("UPDATE user set #{key} = '#{value}' WHERE uid = '#{uid}'")
         else
-          raise UnknownColumnError 
+          raise UnknownColumnError
         end
       end
 
@@ -48,7 +48,7 @@ module Pipes
         if results.count > 0
           return results.first
         else
-          raise UserNotFoundError 
+          raise UserNotFoundError
         end
       end
 

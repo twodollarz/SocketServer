@@ -1,5 +1,3 @@
-#!usr/bin/ruby
-
 # encoding: utf-8
 
 require 'rubygems'
@@ -9,6 +7,7 @@ require 'base64'
 require 'user'
 require 'pipe'
 require 'message'
+require 'push_notification'
 
 class ChatServer
 
@@ -39,7 +38,7 @@ class ChatServer
     end
   end
 
-  def add_socket(key, sock) 
+  def add_socket(key, sock)
     @connections[key] = sock
   end
 
@@ -47,7 +46,7 @@ class ChatServer
     uid = obj1
     udid = id
     add_socket(uid, sock)
-    begin 
+    begin
       user_dbh = Pipes::Model::User.new
       user_dbh.create({:uid => uid, :udid => udid})
       send_toward(uid, "#{timestamp}:#{uid}:reg:success")
@@ -58,7 +57,7 @@ class ChatServer
 
   def settel(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
-    begin 
+    begin
       user_dbh = Pipes::Model::User.new
       user_dbh.set(uid, {:key => 'tel', :value => obj1})
       send_toward(uid, "#{timestamp}:#{uid}:settel:success")
@@ -69,7 +68,7 @@ class ChatServer
 
   def setnickname(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
-    begin 
+    begin
       user_dbh = Pipes::Model::User.new
       user_dbh.set(uid, {:key => 'nickname', :value => obj1})
       send_toward(uid, "#{timestamp}:#{uid}:setnickname:success")
@@ -78,10 +77,10 @@ class ChatServer
     end
   end
 
-  ## TODO Faceimage: decode base64 string and store as file and update db 
+  ## TODO Faceimage: decode base64 string and store as file and update db
   def setfaceimage(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
-    begin 
+    begin
       user_dbh = Pipes::Model::User.new
       user_dbh.set(uid, {:key => 'faceimage_path', :value => obj1})
       send_toward(uid, "#{timestamp}:#{uid}:setfaceimage:success")
@@ -90,12 +89,27 @@ class ChatServer
     end
   end
 
+  def setdevicetoken(sock, timestamp, id, obj1, obj2, obj3)
+    uid = id
+    begin
+      user_dbh = Pipes::Model::User.new
+      user_dbh.set(uid, {:key => 'device_token', :value => obj1})
+      send_toward(uid, "#{timestamp}:#{uid}:setdevicetoken:success")
+    rescue
+      send_toward(uid, "#{timestamp}:#{uid}:setdevicetoken:error:#{$!}")
+    end
+  end
+
   def apply(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin
       pipe_dbh = Pipes::Model::Pipe.new
       pipe_dbh.create({:subj => uid, :obj => obj1})
-      send_toward(obj1, "#{timestamp}:#{uid}:apply")
+      if offline?(obj1)
+        PushNotification.new.notify(obj1, '申請がありました')
+      else
+        send_toward(obj1, "#{timestamp}:#{uid}:apply")
+      end
       send_toward(uid, "#{timestamp}:#{uid}:apply:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:apply:error:#{$!}")
@@ -107,7 +121,11 @@ class ChatServer
     begin
       pipe_dbh = Pipes::Model::Pipe.new
       pipe_dbh.approve({:subj => uid, :obj => obj1})
-      send_toward(obj1, "#{timestamp}:#{uid}:approve")
+      if offline?(obj1)
+        PushNotification.new.notify(obj1, '申請が承認されました')
+      else
+        send_toward(obj1, "#{timestamp}:#{uid}:approve")
+      end
       send_toward(uid, "#{timestamp}:#{uid}:approve:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:approve:error:#{$!}")
@@ -131,7 +149,11 @@ class ChatServer
     begin
       msg_dbh = Pipes::Model::Message.new
       msg_dbh.send_text({:from_uid => uid, :to_uid => obj1, :timestamp => timestamp, :message => obj2})
-      send_toward(obj1, "#{timestamp}:#{uid}:sendtext:#{obj1}:#{obj2}")
+      if offline?(obj1)
+        PushNotification.new.notify(obj1, obj2)
+      else
+        send_toward(obj1, "#{timestamp}:#{uid}:sendtext:#{obj1}:#{obj2}")
+      end
       send_toward(uid, "#{timestamp}:#{uid}:sendtext:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:sendtext:error:#{$!}")
@@ -154,7 +176,7 @@ class ChatServer
   def online(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     add_socket(uid, sock)
-    begin 
+    begin
       send_toward(uid, "#{timestamp}:#{uid}:online:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:online:error:#{$!}")
@@ -163,7 +185,7 @@ class ChatServer
 
   def couplelist(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
-    begin 
+    begin
       pipe_dbh = Pipes::Model::Pipe.new
       @pipes = pipe_dbh.find_approved_pipes(uid)
       partners = []
@@ -180,7 +202,7 @@ class ChatServer
 
   def applylist(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
-    begin 
+    begin
       pipe_dbh = Pipes::Model::Pipe.new
       @pipes = pipe_dbh.find_applying_pipes(uid)
       applylist = @pipes.map { |pipe| pipe[:to_uid] }.join(',')
@@ -189,9 +211,10 @@ class ChatServer
       send_toward(uid, "#{timestamp}:#{uid}:applylist:error:#{$!}")
     end
   end
+
   def approvelist(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
-    begin 
+    begin
       pipe_dbh = Pipes::Model::Pipe.new
       @pipes = pipe_dbh.find_applied_pipes(uid)
       approvelist = @pipes.map { |pipe| pipe[:from_uid] }.join(',')
@@ -203,7 +226,7 @@ class ChatServer
 
   def getlog(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
-    begin 
+    begin
       msg_dbh = Pipes::Model::Message.new
       logs = msg_dbh.get_log({:from_uid => uid, :to_uid => obj1, :from_timestamp => obj2, :to_timestamp => obj3})
       require 'json'
@@ -226,12 +249,16 @@ class ChatServer
   end
 
   def send_toward(key, msg)
-    raise UserIsNotOnlineError unless @connections.has_key?(key)
+    return false if offline?(key)
     puts ""
     puts "= Send Towards ="
     msg.chomp!
     @connections[key].puts(msg)
     puts " #{key} > #{msg}"
+  end
+
+  def offline?(key)
+    !@connections.has_key?(key)
   end
 
   def save_image(key, data)

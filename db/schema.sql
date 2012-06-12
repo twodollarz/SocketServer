@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `udid` CHAR(64) NOT NULL,
   `nickname` VARCHAR(255),
   `tel` VARCHAR(255),
+  `device_token` VARCHAR(255),
   `faceimage_path` VARCHAR(255) ,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `i0` (`udid`)

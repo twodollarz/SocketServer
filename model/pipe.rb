@@ -9,7 +9,7 @@ module Pipes
       class PipeNotFoundError < RuntimeError; end
       class InvalidUserError < RuntimeError; end
       class UserNotFoundError < RuntimeError; end
-      
+
       def initialize
         Mysql2::Client.default_query_options.merge!(:symbolize_keys => true)
         @conn = Mysql2::Client.new(:database => "pipes", :host => "localhost", :username => "root")
@@ -32,7 +32,7 @@ module Pipes
         result = @conn.query("UPDATE pipe set status = 1 WHERE pipe_id = '#{found_pipe[:pipe_id]}}'")
         return result 
       end
-      
+
       def break(args)
         validate_uids(args[:subj], args[:obj])
         from, to, uids = escape_uids(args[:subj], args[:obj])
