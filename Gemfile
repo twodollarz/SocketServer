@@ -8,4 +8,5 @@ gem 'active_support'
 gem 'awesome_print'
 gem 'koala'
 gem 'apns'
+gem 'crack'
 
