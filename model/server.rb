@@ -267,6 +267,7 @@ class ChatServer
   def ping(key)
       puts "\n= Send Ping ="
       @connections[key].puts("0")
+      @connections[key].flush
   end
 
   def send_toward(key, msg)
@@ -278,6 +279,7 @@ class ChatServer
       puts "\n= Send Towards ="
       msg.chomp!
       @connections[key].puts(msg)
+      @connections[key].flush
       puts " #{key} > #{msg}"
     end
   end
