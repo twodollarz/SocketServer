@@ -42,6 +42,21 @@ module Pipes
         return result 
       end
 
+      def set_album(pipe_id, id, url)
+        pipe_id = @conn.escape(pipe_id)
+        id = @conn.escape(id)
+        url = @conn.escape(url)
+        result = @conn.query("UPDATE pipe set album_id = '#{id}', album_url = '#{url}' WHERE pipe_id = '#{pipe_id}'")
+      end
+
+      def set_facebook_token(from_uid, to_uid, token)
+        from_uid = @conn.escape(from_uid)
+        to_uid = @conn.escape(to_uid)
+        token = @conn.escape(token)
+        pipe = find_with_uids(concat_uid(from_uid, to_uid))
+        result = @conn.query("UPDATE pipe set facebook_token = '#{token}' WHERE pipe_id = '#{pipe[:pipe_id]}'")
+      end
+
       def validate_uids (subj, obj)
         raise InvalidUserError if subj == obj || subj.blank? || obj.blank?
         user = @conn.query("SELECT * FROM user WHERE uid IN ('#{subj}', '#{obj}')")
@@ -98,7 +113,6 @@ module Pipes
           raise PipeNotFoundError
         end
       end
-
 
       def find_with_uids(uids)
         uids = @conn.escape(uids)

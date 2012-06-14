@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS `pipe` (
   `from_uid` CHAR(128) NOT NULL,
   `to_uid` CHAR(128) NOT NULL,
   `status` TINYINT NOT NULL,
+  `facebook_token` VARCHAR(255),
+  `album_id` VARCHAR(255),
+  `album_url` VARCHAR(255),
   `uids` CHAR(128) NOT NULL,
   PRIMARY KEY (`pipe_id`),
   UNIQUE KEY `i0` (`uids`)

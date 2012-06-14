@@ -8,6 +8,7 @@ require 'user'
 require 'pipe'
 require 'message'
 require 'push_notification'
+require 'facebook'
 
 class ChatServer
 
@@ -97,6 +98,22 @@ class ChatServer
       send_toward(uid, "#{timestamp}:#{uid}:setdevicetoken:success")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:setdevicetoken:error:#{$!}")
+    end
+  end
+
+  def setfbtoken(sock, timestamp, id, obj1, obj2, obj3)
+    uid = id
+    begin
+      pipe_dbh = Pipes::Model::Pipe.new
+      pipe_dbh.set_facebook_token(uid, obj1, obj2)
+      facebook = Facebook.new(uid, obj1)
+      album = facebook.create_album
+      send_toward(obj1, "#{timestamp}:#{uid}:setfbtoken:#{album['link']}") do
+        PushNotification.new.notify(obj1, 'アルバムが作成されました')
+      end
+      send_toward(uid, "#{timestamp}:#{uid}:setfbtoken:success:#{album['link']}")
+    rescue
+      send_toward(uid, "#{timestamp}:#{uid}:setfbtoken:error:#{$!}")
     end
   end
 

@@ -25,6 +25,7 @@ module Pipes
       end
 
       def set( uid, args )
+        uid = @conn.escape(uid)
         key = @conn.escape(args[:key])
         value = @conn.escape(args[:value])
         raise UserNotFoundError unless exists?({:column => 'uid', :value => uid})
