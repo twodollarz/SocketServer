@@ -26,6 +26,7 @@ class ChatServer
       @thread = Thread.start(@server.accept) do |sock|
         while sock.gets
           $_.chomp!
+          $_.force_encoding('utf-8')
           (timestamp, id, cmd, obj1, obj2, obj3) = $_.split(":")
           puts ""
           puts "= Accept ="
@@ -166,8 +167,7 @@ class ChatServer
         PushNotification.new.notify(obj1, obj2)
       end
       send_toward(uid, "#{timestamp}:#{uid}:sendtext:success")
-    rescue => detail
-      ap detail
+    rescue
       send_toward(uid, "#{timestamp}:#{uid}:sendtext:error:#{$!}")
     end
   end
