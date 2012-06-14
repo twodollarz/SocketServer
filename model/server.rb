@@ -178,6 +178,10 @@ class ChatServer
     end
   end
 
+  def offline(sock, timestamp, id, obj1, obj2, obj3)
+    @connections.delete(id) if @connections.has_key?(id)
+  end
+
   def couplelist(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin
