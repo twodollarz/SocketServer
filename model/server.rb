@@ -105,10 +105,8 @@ class ChatServer
     begin
       pipe_dbh = Pipes::Model::Pipe.new
       pipe_dbh.create({:subj => uid, :obj => obj1})
-      if offline?(obj1)
+      send_toward(obj1, "#{timestamp}:#{uid}:apply") do
         PushNotification.new.notify(obj1, '申請がありました')
-      else
-        send_toward(obj1, "#{timestamp}:#{uid}:apply")
       end
       send_toward(uid, "#{timestamp}:#{uid}:apply:success")
     rescue
@@ -121,10 +119,8 @@ class ChatServer
     begin
       pipe_dbh = Pipes::Model::Pipe.new
       pipe_dbh.approve({:subj => uid, :obj => obj1})
-      if offline?(obj1)
+      send_toward(obj1, "#{timestamp}:#{uid}:approve") do
         PushNotification.new.notify(obj1, '申請が承認されました')
-      else
-        send_toward(obj1, "#{timestamp}:#{uid}:approve")
       end
       send_toward(uid, "#{timestamp}:#{uid}:approve:success")
     rescue
@@ -149,13 +145,12 @@ class ChatServer
     begin
       msg_dbh = Pipes::Model::Message.new
       msg_dbh.send_text({:from_uid => uid, :to_uid => obj1, :timestamp => timestamp, :message => obj2})
-      if offline?(obj1)
+      send_toward(obj1,"#{timestamp}:#{uid}:sendtext:#{obj1}:#{obj2}") do
         PushNotification.new.notify(obj1, obj2)
-      else
-        send_toward(obj1, "#{timestamp}:#{uid}:sendtext:#{obj1}:#{obj2}")
       end
       send_toward(uid, "#{timestamp}:#{uid}:sendtext:success")
-    rescue
+    rescue => detail
+      ap detail
       send_toward(uid, "#{timestamp}:#{uid}:sendtext:error:#{$!}")
     end
   end
@@ -248,17 +243,34 @@ class ChatServer
     end
   end
 
+  def ping(key)
+      puts "\n= Send Ping ="
+      @connections[key].puts("0")
+  end
+
   def send_toward(key, msg)
-    return false if offline?(key)
-    puts ""
-    puts "= Send Towards ="
-    msg.chomp!
-    @connections[key].puts(msg)
-    puts " #{key} > #{msg}"
+    if offline?(key)
+      puts "\n= Send Push Notification ="
+      yield
+      puts " #{key} > #{msg}"
+    else
+      puts "\n= Send Towards ="
+      msg.chomp!
+      @connections[key].puts(msg)
+      puts " #{key} > #{msg}"
+    end
   end
 
   def offline?(key)
-    !@connections.has_key?(key)
+    return true if !@connections.has_key?(key)
+    begin
+      ping(key)
+    rescue Errno::EPIPE  # Broken Pipe Error
+      puts "= Broken Pipe Error ="
+      @connections.delete(key)
+      return true
+    end
+    return false
   end
 
   def save_image(key, data)
