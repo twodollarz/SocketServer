@@ -28,5 +28,26 @@ describe Facebook do
   end
 
   describe 'upload photo' do
+    context 'with jpg' do
+      before (:all) { @picture = @facebook.put_picture(File.expand_path('../images/test.jpg', __FILE__)) }
+      subject { ap @picture; @picture }
+      it { subject["id"].should match(/^\d+$/) }
+      it { subject["picture"].should match(/^http:.*\.jpg$/) }
+      it { subject["link"].should match(/^http:/) }
+    end
+    context 'with png' do
+      before (:all) { @picture = @facebook.put_picture(File.expand_path('../images/test.png', __FILE__)) }
+      subject { ap @picture; @picture }
+      it { subject["id"].should match(/^\d+$/) }
+      it { subject["picture"].should match(/^http:.*\.jpg$/) }
+      it { subject["link"].should match(/^http:/) }
+    end
+    context 'with gif' do
+      before (:all) { @picture = @facebook.put_picture(File.expand_path('../images/test.gif', __FILE__)) }
+      subject { ap @picture; @picture }
+      it { subject["id"].should match(/^\d+$/) }
+      it { subject["picture"].should match(/^http:.*\.jpg$/) }
+      it { subject["link"].should match(/^http:/) }
+    end
   end
 end

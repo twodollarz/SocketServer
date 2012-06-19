@@ -183,14 +183,18 @@ class ChatServer
   def sendimg(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin
+      tmp_file_path = save_tmp_image(uid, obj2)
+
+      facebook = Facebook.new(uid, obj1)
+      image_obj = facebook.put_picture(tmp_file_path)
+      url = image_obj["picture"]
+
       msg_dbh = Pipes::Model::Message.new
-      path = save_image(uid, data)
-      url = "#{ChatServer::IMG_URL}/#{path}"
       msg_dbh.send_img({:from_uid => uid, :to_uid => obj1, :timestamp => timestamp, :image_path=> url})
-      send_toward(obj1, "#{timestamp}:#{uid}:sendimg:#{obj1}:#{obj2}")
+      send_toward(obj1, "#{timestamp}:#{uid}:sendimg:#{obj1}:#{url}")
       send_toward(uid, "#{timestamp}:#{uid}:sendimg:success")
     rescue
-      send_toward(uid, "#{timestamp}:#{uid}:sendiimg:error:#{$!}")
+      send_toward(uid, "#{timestamp}:#{uid}:sendimg:error:#{$!}")
     end
   end
 
@@ -305,12 +309,13 @@ class ChatServer
     return false
   end
 
-  def save_image(uid, data)
-    puts "= Save Image ="
+  def save_tmp_image(uid, data)
+    puts "= Save Temporary Image ="
     time = Time.now.strftime("%Y%m%d%H%M%S")
-    Dir::mkdir("#{ChatServer::IMG_PATH}/#{uid[0..1]}")
-    filepath = "#{uid[0..1]}/#{uid}_#{time}.png"
-    open("#{ChatServer::IMG_PATH}/#{filepath}", "w+b") do |fw|
+    #Dir::mkdir("#{ChatServer::IMG_PATH}/#{uid[0..1]}")
+    #filepath = "#{uid[0..1]}/#{uid}_#{time}.png"
+    filepath = "#{ChatServer::IMG_PATH}/#{uid}_#{time}.png"
+    open(filepath, "w+b") do |fw|
       fw.write(Base64.decode64(data))
     end
     return filepath
