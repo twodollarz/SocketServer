@@ -11,6 +11,8 @@ require 'push_notification'
 require 'facebook'
 
 class ChatServer
+  DB_CONNECTIONS = 5
+  DB_TIMEOUT = 10
 
   class UserIsNotOnlineError < RuntimeError; end
 
@@ -35,6 +37,8 @@ class ChatServer
           puts ""
           puts "= Connections ="
           ap @connections
+          # Collect unnecessary objects to disconnect from database
+          GC.start
         end
       end
     end
@@ -203,9 +207,9 @@ class ChatServer
     uid = id
     begin
       pipe_dbh = Pipes::Model::Pipe.new
-      @pipes = pipe_dbh.find_approved_pipes(uid)
+      pipes = pipe_dbh.find_approved_pipes(uid)
       partners = []
-      @pipes.each do |pipe|
+      pipes.each do |pipe|
         theother = (id == pipe[:to_uid]) ? pipe[:from_uid] : pipe[:to_uid]
         partners.push(theother)
       end
@@ -220,8 +224,8 @@ class ChatServer
     uid = id
     begin
       pipe_dbh = Pipes::Model::Pipe.new
-      @pipes = pipe_dbh.find_applying_pipes(uid)
-      applylist = @pipes.map { |pipe| pipe[:to_uid] }.join(',')
+      pipes = pipe_dbh.find_applying_pipes(uid)
+      applylist = pipes.map { |pipe| pipe[:to_uid] }.join(',')
       send_toward(uid, "#{timestamp}:#{uid}:applylist:success:#{applylist}")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:applylist:error:#{$!}")
@@ -232,8 +236,8 @@ class ChatServer
     uid = id
     begin
       pipe_dbh = Pipes::Model::Pipe.new
-      @pipes = pipe_dbh.find_applied_pipes(uid)
-      approvelist = @pipes.map { |pipe| pipe[:from_uid] }.join(',')
+      pipes = pipe_dbh.find_applied_pipes(uid)
+      approvelist = pipes.map { |pipe| pipe[:from_uid] }.join(',')
       send_toward(uid, "#{timestamp}:#{uid}:approvelist:success:#{approvelist}")
     rescue
       send_toward(uid, "#{timestamp}:#{uid}:approvelist:error:#{$!}")

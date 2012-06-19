@@ -9,4 +9,5 @@ gem 'awesome_print'
 gem 'koala'
 gem 'apns'
 gem 'crack'
+gem 'connection_pool'
 
