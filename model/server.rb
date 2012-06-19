@@ -13,6 +13,10 @@ require 'facebook'
 class ChatServer
   DB_CONNECTIONS = 5
   DB_TIMEOUT = 10
+  FB_APP_ID = '353388311380759'
+  FB_SECRET = 'e578b1f8339533d1c4198a6b44a3045c'
+  IMG_PATH = '/tmp'
+  IMG_URL = 'http://localhost/images'
 
   class UserIsNotOnlineError < RuntimeError; end
 
@@ -176,12 +180,13 @@ class ChatServer
     end
   end
 
-  # TODO save binary
   def sendimg(sock, timestamp, id, obj1, obj2, obj3)
     uid = id
     begin
       msg_dbh = Pipes::Model::Message.new
-      msg_dbh.send_img({:from_uid => uid, :to_uid => obj1, :timestamp => timestamp, :image_path=> obj2})
+      path = save_image(uid, data)
+      url = "#{ChatServer::IMG_URL}/#{path}"
+      msg_dbh.send_img({:from_uid => uid, :to_uid => obj1, :timestamp => timestamp, :image_path=> url})
       send_toward(obj1, "#{timestamp}:#{uid}:sendimg:#{obj1}:#{obj2}")
       send_toward(uid, "#{timestamp}:#{uid}:sendimg:success")
     rescue
@@ -300,14 +305,15 @@ class ChatServer
     return false
   end
 
-  def save_image(key, data)
-    puts "save_image"
-    #fw = open("#{key}_copy.png", "a+b")
+  def save_image(uid, data)
+    puts "= Save Image ="
     time = Time.now.strftime("%Y%m%d%H%M%S")
-    fw = open("tmp/#{key}_#{time}.png", "w+b")
-    #data.chomp!
-    fw.write(Base64.decode64(data))
-    fw.close
+    Dir::mkdir("#{ChatServer::IMG_PATH}/#{uid[0..1]}")
+    filepath = "#{uid[0..1]}/#{uid}_#{time}.png"
+    open("#{ChatServer::IMG_PATH}/#{filepath}", "w+b") do |fw|
+      fw.write(Base64.decode64(data))
+    end
+    return filepath
   end
 
 end
