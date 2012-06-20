@@ -285,9 +285,11 @@ class ChatServer
 
   def send_toward(key, msg)
     if offline?(key)
-      puts "\n= Send Push Notification ="
-      yield
-      puts " #{key} > #{msg}"
+      if block_given?
+        puts "\n= Send Push Notification ="
+        yield
+        puts " #{key} > #{msg}"
+      end
     else
       puts "\n= Send Towards ="
       msg.chomp!
